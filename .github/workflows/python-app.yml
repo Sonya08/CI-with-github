@@ -1,31 +1,56 @@
-name: DockerHub Deploy Python application
+name: Docker Build & Push
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  build-and-push:
-    name: Build, Test, and Push Docker image to Docker Hub
+  test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-      
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: Build Docker image
-        run: docker build -t sonyaas15/sonya-image:latest .
-      
-      - name: Run Unit and Integration Tests
-        run: |
-          docker run sonyaas15/sonya-image:latest python -m unittest discover -s tests
-      
-      - name: Push Docker image to Docker Hub
-        run: docker push sonyaas15/sonya-image:latest
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        # If pytest is not listed in your requirements.txt, add it here
+        pip install pytest
+
+    - name: List directory contents (for debugging)
+      run: ls -la
+
+    - name: Run integration tests
+      run: pytest integration_test.py
+
+    - name: Run unit tests
+      run: pytest test_main.py
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      run: |
+        docker buildx create --use
+        docker buildx build --tag sonyaas15/sonya-image:latest . --push
