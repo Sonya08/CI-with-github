@@ -23,9 +23,9 @@ jobs:
       - name: Build Docker image
         run: docker build -t sonyaas15/sonya-image:latest .
       
-      - name: Run Unit Tests
+      - name: Run Unit and Integration Tests
         run: |
           docker run sonyaas15/sonya-image:latest python -m unittest discover -s tests
-
+      
       - name: Push Docker image to Docker Hub
         run: docker push sonyaas15/sonya-image:latest
