@@ -24,9 +24,19 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: sonyaas15/sonyadockerhub
+          images: sonyaas15/sonya-image
       
       - name: Build Docker image
+<<<<<<< HEAD
+        run: docker build -t sonyaas15/sonya-image:latest .
+      
+      - name: Run Unit Tests
+        run: |
+          docker run sonyaas15/sonya-image:latest python -m unittest discover -s tests
+
+      - name: Push Docker image to Docker Hub
+        run: docker push sonyaas15/sonya-image:latest
+=======
         run: docker build -t sonyaas15/sonyadockerhub:latest .
       
       - name: Run Unit Tests
@@ -35,3 +45,4 @@ jobs:
 
       - name: Push Docker image to Docker Hub
         run: docker push sonyaas15/sonyadockerhub:latest
+>>>>>>> 63e709adb8a899f9201065530e4d5a93e37b43f9
