@@ -1,7 +1,10 @@
-name: Docker Build & Push
+name: Python application test and deploy
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
 
@@ -21,20 +24,16 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-        # If pytest is not listed in your requirements.txt, add it here
-        pip install pytest
+        pip install pytest selenium webdriver-manager
 
-    - name: List directory contents (for debugging)
-      run: ls -la
+    - name: Run unit tests
+      run: python -m unittest test_main.py
 
     - name: Run integration tests
       run: pytest integration_test.py
 
-    - name: Run unit tests
-      run: pytest test_main.py
-
   build-and-push:
-    needs: tests
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
